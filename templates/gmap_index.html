@@ -1,0 +1,63 @@
+<script src="http://maps.google.co.jp/maps?file=api&v=1&key=<{$gmap_API}>" type="text/javascript" charset="utf-8"></script>
+<div id="map" style="width:<{$gmap_width}>px; height:<{$gmap_height}>px"></div>
+<div style="width:<{$gmap_width}>px;text-align:right;font-size:10px;"><a href="http://apap.co4.jp/">gmap module 2.1a</a></div>
+<div id="message"></div>
+
+<script type="text/javascript">
+//<![CDATA[
+window.onload = onLoad;
+function onLoad() {
+  var inq_e = <{$gmap_e}>;
+  var inq_n = <{$gmap_n}>;
+  var inq_z = <{$gmap_z}>;
+  var inq_t = '<div style="width:220px"><{$gmap_text}></div>';
+
+  var map = new GMap(document.getElementById("map"));
+  map.addControl(new GLargeMapControl());
+  // map.setMapType(map.getMapTypes()[1]);
+  // map.addControl(new GSmallMapControl());
+  map.addControl(new GMapTypeControl());
+
+  GEvent.addListener(map, "moveend", function() {
+    var center = map.getCenterLatLng();
+    var zoomlevel = map.getZoomLevel();
+    var latLngStr = '<form>';
+<{if $gmap_wiki == "1"}>
+    var latLngStr = latLngStr + 'wiki:<input size=50 value="#gmapp(' + center.x + ',' + center.y + ','+ zoomlevel + ')"><br />';
+<{/if}>
+<{if $gmap_link == "1"}>
+    var latLngStr = latLngStr + 'URL:<input size=60 value="<{$smarty.const.XOOPS_URL}>/modules/gmap/?n=' + center.y + '&e=' + center.x + '&z='+ zoomlevel + '&t="><br />';
+<{/if}>
+<{if $gmap_blog == "1"}>
+    var latLngStr = latLngStr + 'blog:<input size=60 value="&lt;iframe src=\'/fgmap/?n=' + center.y + '&e=' + center.x + '&z='+ zoomlevel + '&t=\'\' width=\'400\' height=\'350\' frameborder=\'0\' scrolling=\'no\'&gt;&lt;/iframe&gt;"><br />';
+<{/if}>
+    var latLngStr = latLngStr + '</form>';
+<{if $xoopsUserIsAdmin}>
+    var latLngStr = latLngStr + '<form action="set_default.php" method="post">';
+    var latLngStr = latLngStr + '<input type="hidden" name="n" value="' + center.y + '"/>';
+    var latLngStr = latLngStr + '<input type="hidden" name="e" value="' + center.x + '"/>';
+    var latLngStr = latLngStr + '<input type="hidden" name="z" value="' + zoomlevel + '"/>';
+    var latLngStr = latLngStr + '<input type="submit" name="submit" value="<{$smarty.const._GMAP_LANG_SETDEFAULT}>"/>';
+    var latLngStr = latLngStr + '</form>';
+<{/if}>
+    document.getElementById('message').innerHTML = latLngStr;
+  });
+  map.centerAndZoom(new GPoint(inq_e, inq_n), inq_z);
+  addMarker(map, inq_e, inq_n,inq_t);
+}
+
+// Creates a marker whose info window displays the given number
+function addMarker(map, lat, lng, html) {
+  var point = new GPoint(lat, lng);
+  var marker = new GMarker(point);
+  map.addOverlay(marker);
+<{if $gmap_fuki == "1"}>
+  marker.openInfoWindowHtml(html);
+<{/if}>
+  // Show this markers index in the info window when it is clicked
+  GEvent.addListener(marker, "click", function() {
+    marker.openInfoWindowHtml(html);
+  });
+}
+//]]>
+</script>
